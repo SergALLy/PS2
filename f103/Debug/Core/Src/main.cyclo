@@ -1,0 +1,13 @@
+../Core/Src/main.c:60:6:PS2_Cmd	2
+../Core/Src/main.c:69:6:PS2_ShortPoll	1
+../Core/Src/main.c:80:6:PS2_EnterConfig	1
+../Core/Src/main.c:95:6:PS2_Setup	1
+../Core/Src/main.c:110:6:PS2_VibrationMode	1
+../Core/Src/main.c:121:6:PS2_ExitConfig	1
+../Core/Src/main.c:136:6:PS2_Init	1
+../Core/Src/main.c:153:6:PS2_Start	1
+../Core/Src/main.c:161:6:PS2_ReadData	1
+../Core/Src/main.c:169:6:PS2_Vibration	1
+../Core/Src/main.c:181:5:main	1
+../Core/Src/main.c:236:6:SystemClock_Config	3
+../Core/Src/main.c:276:6:Error_Handler	1

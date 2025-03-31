@@ -1,0 +1,13 @@
+../Core/Src/main.c:60:6:PS2_Cmd	32	static
+../Core/Src/main.c:69:6:PS2_ShortPoll	8	static
+../Core/Src/main.c:80:6:PS2_EnterConfig	8	static
+../Core/Src/main.c:95:6:PS2_Setup	8	static
+../Core/Src/main.c:110:6:PS2_VibrationMode	8	static
+../Core/Src/main.c:121:6:PS2_ExitConfig	8	static
+../Core/Src/main.c:136:6:PS2_Init	64	static
+../Core/Src/main.c:153:6:PS2_Start	16	static
+../Core/Src/main.c:161:6:PS2_ReadData	16	static
+../Core/Src/main.c:169:6:PS2_Vibration	24	static
+../Core/Src/main.c:181:5:main	128	static
+../Core/Src/main.c:236:6:SystemClock_Config	72	static
+../Core/Src/main.c:276:6:Error_Handler	4	static,ignoring_inline_asm
