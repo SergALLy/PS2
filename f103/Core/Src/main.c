@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -34,8 +35,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define CS_H	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET)
-#define CS_L	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET)
+#define CS_H	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_SET)
+#define CS_L	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,13 +58,11 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void PS2_Cmd(uint8_t* TxData, uint8_t* RxData, uint8_t size)
+void PS2_Cmd(uint8_t* TxData, uint8_t size)
 {
-	if (RxData == NULL)
-		HAL_SPI_Transmit(&hspi1, TxData, size, 100);
-	else
-		HAL_SPI_TransmitReceive(&hspi1, TxData, RxData, size, 100);
-
+	CS_H; CS_L; HAL_Delay(1);
+	HAL_SPI_Transmit(&hspi1, TxData, size, 100);
+	CS_H; HAL_Delay(1);
 }
 
 void PS2_Init ()
@@ -81,39 +80,37 @@ void PS2_Init ()
 	uint8_t Push[9] = {0x01, 0x4F, 0x00, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00};
 	uint8_t ExitConfig[9] = {0x01, 0x43, 0x00, 0x00, 0x5A, 0x5A, 0x5A, 0x5A, 0x5A};
 
-	PS2_Cmd(ShortPoll, NULL, 5);
-	PS2_Cmd(ShortPoll, NULL, 5);
-	PS2_Cmd(ShortPoll, NULL, 5);
-	PS2_Cmd(EnterConfig, NULL, 5);
-	PS2_Cmd(Setup, NULL, 9);
-	PS2_Cmd(VibrationMode, NULL, 9);
-	PS2_Cmd(Push, NULL, 9);
-	PS2_Cmd(ExitConfig, NULL, 9);
+	PS2_Cmd(ShortPoll, 5);
+	PS2_Cmd(ShortPoll, 5);
+	PS2_Cmd(ShortPoll, 5);
+	PS2_Cmd(EnterConfig, 5);
+	PS2_Cmd(Setup, 9);
+	PS2_Cmd(VibrationMode, 9);
+	PS2_Cmd(Push, 9);
+	PS2_Cmd(ExitConfig, 9);
 }
 
-void PS2_Start(uint8_t* ID)
+void PS2_Start(uint8_t* data)
 {
-	CS_H; CS_L; HAL_Delay(1);
-	PS2_Cmd(0x01, NULL, 1);
-	PS2_Cmd(0x42, ID, 1);
-	CS_H; HAL_Delay(1);
+	uint8_t start_bit[3] = {0x01, 0x42, 0x00};
+	HAL_SPI_TransmitReceive(&hspi1, start_bit, data, 3, 100);
 }
 
-void PS2_ReadData(uint8_t *data, uint8_t* id)
+void PS2_ReadData(uint8_t *data)
 {
 	CS_H; CS_L; HAL_Delay(1);
-	PS2_Start(id);
-	HAL_SPI_Receive(&hspi1, data, 7, 100);
+	PS2_Start(data);
+	for (uint8_t i=3; i<9; i++)
+	{
+		HAL_SPI_Receive(&hspi1, data[i], 1, 100);
+	}
 	CS_H; HAL_Delay(1);
 }
 
 void PS2_Vibration(uint8_t motor1, uint8_t motor2)
 {
-	CS_H, CS_L;
-	HAL_Delay(1);
 	uint8_t buff[9] = {0x01, 0x42, 0x00, motor1, motor2, 0x00, 0x00, 0x00, 0x00};
-	PS2_Cmd(buff, NULL, 9);
-	CS_H; HAL_Delay(1);
+	PS2_Cmd(buff, 9);
 }
 /* USER CODE END 0 */
 
@@ -150,9 +147,7 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   PS2_Init();
-  uint8_t Data[7] ={0};
-  uint8_t str[64];
-  uint8_t ID = 0;
+  uint8_t Data[9] ={0};
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -161,11 +156,9 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-	  PS2_ReadData(Data, &ID);
-	  sprintf(str, "Режим: 0x%x\n", ID);
-	  HAL_UART_Transmit(&huart1, str, 64, 100);
-	  HAL_UART_Transmit(&huart1, "T\n", 2, 100);
-	  HAL_Delay(1000);
+	  PS2_ReadData(Data);
+	  HAL_UART_Transmit(&huart1, Data, 9, 100);
+	  HAL_Delay(200);
     /* USER CODE BEGIN 3 */
 
   }
