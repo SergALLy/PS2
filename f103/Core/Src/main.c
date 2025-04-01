@@ -24,7 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,111 +66,54 @@ void PS2_Cmd(uint8_t* TxData, uint8_t* RxData, uint8_t size)
 
 }
 
-void PS2_ShortPoll()
-{
-	CS_H; CS_L;
-	PS2_Cmd(0x01, NULL, 1);
-	PS2_Cmd(0x42, NULL, 1 );
-	PS2_Cmd(0x00, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	CS_H;
-}
-
-void PS2_EnterConfig()
-{
-	CS_H; CS_L;
-	PS2_Cmd(0x01, NULL, 1);
-	PS2_Cmd(0x43, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	PS2_Cmd(0x01, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	PS2_Cmd(0x00, NULL, 1);
-	CS_H;
-}
-
-void PS2_Setup()
-{
-	CS_H; CS_L;
-	PS2_Cmd(0x01, NULL,1);
-	PS2_Cmd(0x44, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x01, NULL,1);
-	PS2_Cmd(0xEE, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	CS_H;
-}
-
-void PS2_VibrationMode()
-{
-	CS_H; CS_L;
-	PS2_Cmd(0x01, NULL,1);
-	PS2_Cmd(0x4D, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x01, NULL,1);
-	CS_H;
-}
-
-void PS2_ExitConfig()
-{
-	CS_H; CS_L;
-	PS2_Cmd(0x01, NULL,1);
-	PS2_Cmd(0x43, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x00, NULL,1);
-	PS2_Cmd(0x5A, NULL,1);
-	PS2_Cmd(0x5A, NULL,1);
-	PS2_Cmd(0x5A, NULL,1);
-	PS2_Cmd(0x5A, NULL,1);
-	PS2_Cmd(0x5A, NULL,1);
-	CS_H;
-}
-
 void PS2_Init ()
 {
-	uint8_t ShortPoll[5] = {0x01, 0x42, 0x00, 0x00, 0x00};
+/*	uint8_t ShortPoll[5] = {0x01, 0x42, 0x00, 0x00, 0x00};
 	uint8_t EnterConfig[9] = {0x01, 0x43, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
 	uint8_t Setup[9] = {0x01, 0x44, 0x00, 0x01, 0xEE, 0x00, 0x00, 0x00, 0x00};
-	uint8_t VibrationMode[5] = {0x01, 0x04D, 0x00, 0x00, 0x01};
+	uint8_t VibrationMode[5] = {0x01, 0x4D, 0x00, 0x00, 0x01};
+	uint8_t ExitConfig[9] = {0x01, 0x43, 0x00, 0x00, 0x5A, 0x5A, 0x5A, 0x5A, 0x5A};
+*/
+	uint8_t ShortPoll[5] = {0x01, 0x42, 0x00, 0xff, 0xff};
+	uint8_t EnterConfig[5] = {0x01, 0x43, 0x00, 0x01, 0x00};
+	uint8_t Setup[9] = {0x01, 0x44, 0x00, 0x01, 0xEE, 0x00, 0x00, 0x00, 0x00};
+	uint8_t VibrationMode[9] = {0x01, 0x4D, 0x00, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff};
+	uint8_t Push[9] = {0x01, 0x4F, 0x00, 0xff, 0xff, 0x03, 0x00, 0x00, 0x00};
 	uint8_t ExitConfig[9] = {0x01, 0x43, 0x00, 0x00, 0x5A, 0x5A, 0x5A, 0x5A, 0x5A};
 
 	PS2_Cmd(ShortPoll, NULL, 5);
 	PS2_Cmd(ShortPoll, NULL, 5);
 	PS2_Cmd(ShortPoll, NULL, 5);
-	PS2_Cmd(EnterConfig, NULL, 9);
+	PS2_Cmd(EnterConfig, NULL, 5);
 	PS2_Cmd(Setup, NULL, 9);
-	PS2_Cmd(VibrationMode, NULL, 5);
+	PS2_Cmd(VibrationMode, NULL, 9);
+	PS2_Cmd(Push, NULL, 9);
 	PS2_Cmd(ExitConfig, NULL, 9);
 }
 
 void PS2_Start(uint8_t* ID)
 {
-	CS_H; CS_L;
+	CS_H; CS_L; HAL_Delay(1);
 	PS2_Cmd(0x01, NULL, 1);
 	PS2_Cmd(0x42, ID, 1);
-	CS_H;
+	CS_H; HAL_Delay(1);
 }
 
 void PS2_ReadData(uint8_t *data, uint8_t* id)
 {
-	CS_H; CS_L;
+	CS_H; CS_L; HAL_Delay(1);
 	PS2_Start(id);
 	HAL_SPI_Receive(&hspi1, data, 7, 100);
-	CS_H;
+	CS_H; HAL_Delay(1);
 }
 
 void PS2_Vibration(uint8_t motor1, uint8_t motor2)
 {
 	CS_H, CS_L;
-	uint8_t buff[7] = {0x01, 0x42, 0x00, motor1, motor2, 0x00, 0x00, 0x00, 0x00};
-	PS2_Cmd(buff, NULL, 7);
+	HAL_Delay(1);
+	uint8_t buff[9] = {0x01, 0x42, 0x00, motor1, motor2, 0x00, 0x00, 0x00, 0x00};
+	PS2_Cmd(buff, NULL, 9);
+	CS_H; HAL_Delay(1);
 }
 /* USER CODE END 0 */
 
@@ -217,12 +160,12 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	  HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
 	  PS2_ReadData(Data, &ID);
-	  sprintf(str,"Режим: %x\n", ID);
+	  sprintf(str, "Режим: 0x%x\n", ID);
 	  HAL_UART_Transmit(&huart1, str, 64, 100);
-	  sprintf(str,"Данные: %x %x %x %x %x %x %x\n", Data[0], Data[1], Data[2], Data[3], Data[4], Data[5], Data[6]);
-	  HAL_UART_Transmit(&huart1, str, 64, 100);
-
+	  HAL_UART_Transmit(&huart1, "T\n", 2, 100);
+	  HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
 
   }
